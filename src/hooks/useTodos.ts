@@ -7,15 +7,10 @@ import { List } from "../pages/TodoLists"
 
 export const useTodos = () => {
     const [todos, setTodos] = useState<Todo[]>([])
-    const [showNewTodoForm, setShowNewTodoForm] = useState(false)
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-    const [showEditForm, setShowEditForm] = useState(false)
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-    const [itemToDelete, setItemToDelete] = useState<Todo | null>(null)
+    const [newTodo, setNewTodo] = useState<Todo>({ title: '', description: '' })
+    const [todoToDelete, setTodoToDelete] = useState<Todo>({ title: '', description: '' })
+    const [todoToEdit, setTodoToEdit] = useState<Todo>({ title: '', description: '' })
     const [todoList, setTodoList] = useState<List | null>(null)
-    const [itemToEdit, setItemToEdit] = useState<Todo | null>(null)
-    
     
     const auth = useAuth()
     const { listId } = useParams<{ listId: string }>()
@@ -41,36 +36,31 @@ export const useTodos = () => {
         fetchTodos()
     }, [fetchList, fetchTodos])
 
-    const handleCreateTodo = async () => {
+    const handleDeleteTodo = async () => {
         if (listId && auth?.token) {
-            await createTodo(listId, auth.token, title, description)
+            await deleteTodo(listId, todoToDelete.id as number, auth.token)
             fetchTodos()
-            setTitle('')
-            setDescription('')
-            setShowNewTodoForm(false)
         }
     }
 
-    const handleDeleteTodo = async (todo: Todo) => {
+    const handleEditTodo = async () => {
         if (listId && auth?.token) {
-            await deleteTodo(listId, todo.id, auth.token)
+            await updateTodo(todoToEdit, auth.token)
             fetchTodos()
-            setShowDeleteConfirm(false)
+        }
+    }
+
+    const handleCreateTodo = async () => {
+        if (listId && auth?.token) {
+            await createTodo(listId, newTodo, auth.token)
+            fetchTodos()
         }
     }
 
     const handleUpdateIsCompleted = async (todo: Todo) => {
         if (listId && auth?.token) {
-            await updateIsCompleted(listId, todo.id, auth.token, todo.isCompleted)
+            await updateIsCompleted(listId, todo, auth.token)
             fetchTodos()
-        }
-    }
-
-    const handleUpdateTodo = async (todo: Todo) => {
-        if (listId && auth?.token) {
-            await updateTodo(todo, auth.token)
-            fetchTodos()
-            setShowEditForm(false)
         }
     }
 
@@ -79,23 +69,15 @@ export const useTodos = () => {
         todoList,
         setTodoList,
         todos,
-        title,
-        setTitle,
-        description,
-        setDescription,
-        showNewTodoForm,
-        setShowNewTodoForm,
-        showDeleteConfirm,
-        showEditForm,
-        setShowEditForm,
-        setShowDeleteConfirm,
         handleCreateTodo,
         handleDeleteTodo,
-        itemToDelete,
-        setItemToDelete,
-        itemToEdit,
-        setItemToEdit,
+        newTodo,
+        setNewTodo,
+        todoToDelete,
+        setTodoToDelete,
+        todoToEdit,
+        setTodoToEdit,
         handleUpdateIsCompleted,
-        handleUpdateTodo
+        handleEditTodo
     }
 }

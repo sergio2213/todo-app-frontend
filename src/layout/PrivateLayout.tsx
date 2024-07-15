@@ -21,12 +21,12 @@ export const PrivateLayout = ({ children }: PrivateLayoutProps) => {
         setAnchorElNav(event.currentTarget)
     }
 
-    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElUser(event.currentTarget)
-    }
-
     const handleCloseNavMenu = () => {
         setAnchorElNav(null)
+    }
+
+    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElUser(event.currentTarget)
     }
 
     const handleCloseUserMenu = () => {
@@ -34,7 +34,9 @@ export const PrivateLayout = ({ children }: PrivateLayoutProps) => {
     }
 
     const handleLogout = () => {
-        auth?.logoutAction()
+        if (auth?.isAuth) {
+            auth.logoutAction()
+        }
         navigate('/')
     }
 
@@ -68,7 +70,6 @@ export const PrivateLayout = ({ children }: PrivateLayoutProps) => {
                                 <MenuIcon />
                             </IconButton>
                             <Menu
-                                id="menu-appbar"
                                 anchorEl={anchorElNav}
                                 anchorOrigin={{
                                     vertical: 'bottom',
@@ -86,9 +87,11 @@ export const PrivateLayout = ({ children }: PrivateLayoutProps) => {
                                 }}
                             >
 
-                                <MenuItem onClick={handleCloseNavMenu}>
-                                    <Typography component={Link} to='/lists' sx={{ textDecoration: 'none', color: 'inherit' }} textAlign="center">My Todo Lists</Typography>
-                                </MenuItem>
+                                <Link to='/lists' style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <MenuItem onClick={handleCloseNavMenu}>
+                                        <Typography textAlign="center">My Todo Lists</Typography>
+                                    </MenuItem>
+                                </Link>
                             </Menu>
                         </Box>
                         <Typography
@@ -108,12 +111,15 @@ export const PrivateLayout = ({ children }: PrivateLayoutProps) => {
                             TODO APP
                         </Typography>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                            <Button
-                                onClick={handleCloseNavMenu}
-                                sx={{ my: 2, color: 'white', display: 'block' }}
-                            >
-                                <Link to='/lists' style={{ textDecoration: 'none', color: 'inherit' }}>My Todo Lists</Link>
-                            </Button>
+                            <Link to='/lists' style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Button
+                                    onClick={handleCloseNavMenu}
+                                    sx={{ my: 2, color: 'white', display: 'block' }}
+                                >
+                                    My Todo Lists
+                                </Button>
+                            </Link>
+
                         </Box>
 
                         <Box sx={{ flexGrow: 0 }}>
@@ -124,7 +130,6 @@ export const PrivateLayout = ({ children }: PrivateLayoutProps) => {
                             </Tooltip>
                             <Menu
                                 sx={{ mt: '45px' }}
-                                id="menu-appbar"
                                 anchorEl={anchorElUser}
                                 anchorOrigin={{
                                     vertical: 'top',
@@ -139,17 +144,14 @@ export const PrivateLayout = ({ children }: PrivateLayoutProps) => {
                                 onClose={handleCloseUserMenu}
                             >
                                 <MenuItem onClick={handleCloseUserMenu}>
-                                    Profile
-                                </MenuItem>
-                                <MenuItem onClick={handleCloseUserMenu}>
-                                    <Link to='/lists' style={{ textDecoration: 'none', color: 'inherit' }}>My Todo Lists</Link>
+                                    <Link to='/' style={{ textDecoration: 'none', color: 'inherit' }}>My Profile</Link>
                                 </MenuItem>
                                 <Divider />
                                 <MenuItem onClick={handleLogout}>
-                                    <ListItemIcon onClick={handleLogout}>
+                                    <ListItemIcon>
                                         <Logout fontSize="small" />
                                     </ListItemIcon>
-                                    <Typography component='a' textAlign="center">Logout</Typography>
+                                    <Typography textAlign="center">Logout</Typography>
                                 </MenuItem>
                             </Menu>
                         </Box>

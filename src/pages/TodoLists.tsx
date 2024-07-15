@@ -3,69 +3,54 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, D
 import { ListCard } from "../components/ListCard"
 import { useLists } from "../hooks/useLists"
 import { EmptyState } from "../components/EmptyState"
+import { useState } from "react"
 
 export interface List {
-    id: number
+    id?: number
     title: string
     description: string
-    userId: number
+    userId?: number
 }
 
 export const TodoLists = () => {
 
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [showEditForm, setShowEditForm] = useState(false)
+    const [showNewListForm, setShowNewListForm] = useState(false)
+
     const {
         user,
         lists,
-        showNewListForm,
-        setShowNewListForm,
-        showDeleteConfirm,
-        setShowDeleteConfirm,
-        showEditForm,
-        setShowEditForm,
-        title,
-        setTitle,
-        description,
-        setDescription,
         listToDelete,
         setListToDelete,
         listToEdit,
         setListToEdit,
+        newList,
+        setNewList,
         handleCreateList,
         handleDeleteList,
         handleEditList
     } = useLists()
 
-    const handleOpenNewListForm = () => {
-        setShowNewListForm(true)
-    }
+    // ----------------------------------- DELETE LIST
 
-    const handleCloseNewListForm = () => {
-        setTitle('')
-        setDescription('')
-        setShowNewListForm(false)
-    }
-
-    const handleSubmitNewList = (e: React.FormEvent) => {
-        e.preventDefault()
-        handleCreateList()
-        setTitle('')
-        setDescription('')
-        setShowNewListForm(false)
+    const handleOpenDeleteConfirm = (list: List) => {
+        setListToDelete(list)
+        setShowDeleteConfirm(true)
     }
 
     const handleCloseDeleteConfirm = () => {
         setShowDeleteConfirm(false)
+        setListToDelete({ title: '', description: '' })
     }
 
-    const handleOpenDeleteConfirm = (list: List) => {
-        setShowDeleteConfirm(true)
-        setListToDelete(list)
-    }
-
-    const handleDelete = (list: List) => {
-        handleDeleteList(list)
+    const handleDeleteAction = () => {
+        handleDeleteList()
         setShowDeleteConfirm(false)
+        setListToDelete({ title: '', description: '' })
     }
+
+    // ------------------------- EDIT LIST
 
     const handleOpenEditForm = (list: List) => {
         setListToEdit(list)
@@ -74,19 +59,42 @@ export const TodoLists = () => {
 
     const handleCloseEditForm = () => {
         setShowEditForm(false)
-        setListToEdit(null)
+        setListToEdit({ title: '', description: '' })
     }
 
     const handleListToEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setListToEdit({...listToEdit, [name]: value} as List)
+        setListToEdit({ ...listToEdit, [name]: value } as List)
     }
 
-    const handleSubmitListEdit = (e: React.FormEvent) => {
+    const handleListEditAction = (e: React.FormEvent) => {
         e.preventDefault()
-        handleEditList(listToEdit as List)
-        setListToEdit(null)
+        handleEditList()
         setShowEditForm(false)
+        setListToEdit({ title: '', description: '' })
+    }
+
+    // ------------------------- CREATE LIST
+
+    const handleOpenNewListForm = () => {
+        setShowNewListForm(true)
+    }
+
+    const handleCloseNewListForm = () => {
+        setShowNewListForm(false)
+        setNewList({ title: '', description: '' })
+    }
+
+    const handleNewListChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setNewList({ ...newList, [name]: value } as List)
+    }
+
+    const handleCreateListAction = (e: React.FormEvent) => {
+        e.preventDefault()
+        handleCreateList()
+        setShowNewListForm(false)
+        setNewList({ title: '', description: '' })
     }
 
     return (
@@ -96,7 +104,7 @@ export const TodoLists = () => {
                 <Box sx={{ px: '20px', py: '20px', display: 'flex', flexWrap: 'wrap', flexDirection: 'row', gap: '10px', justifyContent: 'center' }}>
                     {lists.length === 0 ? <EmptyState message="You do not have any lists, create one to start!" /> : lists.map(list => {
                         return (
-                            <ListCard handleOpenEditForm={handleOpenEditForm} key={list.id} list={list} handleDelete={handleOpenDeleteConfirm} />
+                            <ListCard onEdit={handleOpenEditForm} key={list.id} list={list} onDelete={handleOpenDeleteConfirm} />
                         )
                     })}
                 </Box>
@@ -105,23 +113,23 @@ export const TodoLists = () => {
                     <Button onClick={handleOpenNewListForm} variant='contained'>Create New List</Button>
                 </Box>
                 {/* FORMULARIO NUEVA LISTA */}
-                <Dialog open={showNewListForm} onClose={handleOpenNewListForm}>
+                <Dialog open={showNewListForm} onClose={handleCloseNewListForm}>
                     <DialogTitle>New List</DialogTitle>
                     <DialogContent>
-                        <Box component='form' id='form' onSubmit={handleSubmitNewList} sx={{ display: 'flex', gap: 5 }}>
-                            <TextField label='Title' value={title} onChange={(e) => setTitle(e.target.value)} variant='standard' required />
-                            <TextField label='Description' value={description} onChange={(e) => setDescription(e.target.value)} variant='standard' />
+                        <Box component='form' id='newListForm' onSubmit={handleCreateListAction} sx={{ display: 'flex', gap: 5 }}>
+                            <TextField label='Title' name='title' value={newList.title} onChange={handleNewListChange} variant='standard' required />
+                            <TextField label='Description' name='description' value={newList.description} onChange={handleNewListChange} variant='standard' />
                         </Box>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseNewListForm} variant='contained'>Cancel</Button>
-                        <Button type='submit' form='form' variant='contained'>Create</Button>
+                        <Button type='submit' form='newListForm' variant='contained'>Create</Button>
                     </DialogActions>
                 </Dialog>
                 {/* CONFIRMACIÓN ELIMINAR LISTA */}
                 <Dialog
                     open={showDeleteConfirm}
-                    onClose={() => setShowDeleteConfirm(false)}
+                    onClose={handleCloseDeleteConfirm}
                 >
                     <DialogTitle>
                         Warning
@@ -133,7 +141,7 @@ export const TodoLists = () => {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseDeleteConfirm}>Cancel</Button>
-                        <Button onClick={() => handleDelete(listToDelete as List)}>
+                        <Button onClick={handleDeleteAction}>
                             Delete
                         </Button>
                     </DialogActions>
@@ -142,7 +150,7 @@ export const TodoLists = () => {
                 <Dialog open={showEditForm} onClose={handleCloseEditForm}>
                     <DialogTitle>Edit List</DialogTitle>
                     <DialogContent>
-                        <Box component='form' id='editForm' onSubmit={handleSubmitListEdit} sx={{ display: 'flex', gap: 5 }}>
+                        <Box component='form' id='editForm' onSubmit={handleListEditAction} sx={{ display: 'flex', gap: 5 }}>
                             <TextField label='Title' name='title' value={listToEdit?.title} onChange={handleListToEditChange} variant='standard' required />
                             <TextField label='Description' name='description' value={listToEdit?.description} onChange={handleListToEditChange} variant='standard' />
                         </Box>

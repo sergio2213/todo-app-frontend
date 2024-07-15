@@ -1,6 +1,40 @@
 import { URL_API } from "../config/api";
 import { List } from "../pages/TodoLists";
 import { Todo } from "../pages/Todos";
+import { AuthResponse, RegisterResponse } from "../types/types";
+
+export const login = async (email: string, password: string): Promise<AuthResponse | null> => {
+    const response = await fetch(`${URL_API}/auth/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'same-origin'
+    })
+    if (response.ok) {
+        return (await response.json()).data as AuthResponse
+    } else {
+        return null
+    }
+}
+
+export const register = async (username: string, email: string, password: string): Promise<RegisterResponse | null> => {
+    const response = await fetch(`${URL_API}/user/new`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, email, password }),
+        credentials: 'same-origin'
+    })
+    if (response.ok) {
+        const data = await response.json()
+        return data as RegisterResponse
+    } else {
+        return null
+    }
+}
 
 export const getTodos = async (listId: string, token: string): Promise<Todo[]> => {
     const response = await fetch(`${URL_API}/lists/${listId}/todos`, {
@@ -14,8 +48,8 @@ export const getTodos = async (listId: string, token: string): Promise<Todo[]> =
     return (await response.json()).data.todos as Todo[]
 }
 
-export const createTodo = async (listId: string, token: string, title: string, description: string): Promise<void> => {
-    const body = { title, description }
+export const createTodo = async (listId: string, newTodo: Todo, token: string): Promise<void> => {
+    const { title, description } = newTodo
     const response = await fetch(`${URL_API}/lists/${listId}/todos`, {
         method: 'POST',
         headers: {
@@ -23,7 +57,7 @@ export const createTodo = async (listId: string, token: string, title: string, d
             'Authorization': `Bearer ${token}`
         },
         credentials: 'same-origin',
-        body: JSON.stringify(body)
+        body: JSON.stringify({ title, description })
     })
     const json = await response.json()
     console.log(json.message)
@@ -42,11 +76,11 @@ export const deleteTodo = async (listId: string, todoId: number, token: string):
     console.log(json.message)
 }
 
-export const updateIsCompleted = async (listId: string, todoId: number, token: string, isCompleted: boolean): Promise<void> => {
+export const updateIsCompleted = async (listId: string, todo: Todo, token: string): Promise<void> => {
     const body = {
-        isCompleted: !isCompleted
+        isCompleted: !todo.isCompleted
     }
-    const response = await fetch(`${URL_API}/lists/${listId}/todos/${todoId}/completed`, {
+    const response = await fetch(`${URL_API}/lists/${listId}/todos/${todo.id}/completed`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -84,9 +118,9 @@ export const getOneList = async (token: string, listId: string): Promise<List> =
     return todoList
 }
 
-export const createList = async (token: string, title: string, description: string) => {
+export const createList = async (list: List, token: string) => {
 
-    const body = { title, description }
+    const { title, description } = list
     const response = await fetch(`${URL_API}/lists`, {
         method: 'POST',
         headers: {
@@ -94,7 +128,7 @@ export const createList = async (token: string, title: string, description: stri
             'Authorization': `Bearer ${token}`
         },
         credentials: 'same-origin',
-        body: JSON.stringify(body)
+        body: JSON.stringify({ title, description })
     })
     const json = await response.json()
     console.log(json.message)

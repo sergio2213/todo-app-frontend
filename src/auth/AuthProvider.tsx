@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react"
-import { AuthResponse, User } from "../types/types"
-import { URL_API } from "../config/api"
+import { User } from "../types/types"
+import { login } from "../services/apiService"
 
 export interface AuthContextData {
     loginAction: (email: string, password: string) => void
@@ -33,16 +33,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const loginAction = async (email: string, password: string) => {
         try {
-            const response = await fetch(`${URL_API}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password }),
-                credentials: 'same-origin'
-            })
-            const data = (await response.json()).data as AuthResponse
-            if (data) {
+            const data = await login(email, password)
+            if (data !== null) {
                 setUser(data.user)
                 setToken(data.token)
                 localStorage.setItem('token', data.token)

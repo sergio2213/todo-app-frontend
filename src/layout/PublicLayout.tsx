@@ -3,20 +3,20 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import MenuIcon from '@mui/icons-material/Menu'
 
-interface LayoutProps {
+interface PublicLayoutProps {
     children: React.ReactNode
 }
 
-export const PublicLayout = ({ children }: LayoutProps) => {
+export const PublicLayout = ({ children }: PublicLayoutProps) => {
 
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null)
 
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
+    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElNav(event.currentTarget)
     }
 
-    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElNav(event.currentTarget);
+    const handleCloseNavMenu = () => {
+        setAnchorElNav(null)
     }
 
     return (
@@ -49,7 +49,6 @@ export const PublicLayout = ({ children }: LayoutProps) => {
                                 <MenuIcon />
                             </IconButton>
                             <Menu
-                                id="menu-appbar"
                                 anchorEl={anchorElNav}
                                 anchorOrigin={{
                                     vertical: 'bottom',
@@ -67,12 +66,16 @@ export const PublicLayout = ({ children }: LayoutProps) => {
                                 }}
                             >
 
-                                <MenuItem onClick={handleCloseNavMenu}>
-                                    <Typography component={Link} to='/' sx={{ textDecoration: 'none', color: 'inherit' }} textAlign="center">Login</Typography>
-                                </MenuItem>
-                                <MenuItem onClick={handleCloseNavMenu}>
-                                    <Typography component={Link} to='/register' sx={{ textDecoration: 'none', color: 'inherit' }} textAlign="center">Register</Typography>
-                                </MenuItem>
+                                <Link to='/' style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <MenuItem onClick={handleCloseNavMenu}>
+                                        <Typography textAlign="center">Login</Typography>
+                                    </MenuItem>
+                                </Link>
+                                <Link to='/register' style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <MenuItem onClick={handleCloseNavMenu}>
+                                        <Typography textAlign="center">Register</Typography>
+                                    </MenuItem>
+                                </Link>
                             </Menu>
                         </Box>
                         <Typography
@@ -92,18 +95,22 @@ export const PublicLayout = ({ children }: LayoutProps) => {
                             TODO APP
                         </Typography>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, flexDirection: 'row-reverse' }}>
-                            <Button
-                                onClick={handleCloseNavMenu}
-                                sx={{ my: 2, color: 'white', display: 'block' }}
-                            >
-                                <Link to='/' style={{ textDecoration: 'none', color: 'inherit' }}>Login</Link>
-                            </Button>
-                            <Button
-                                onClick={handleCloseNavMenu}
-                                sx={{ my: 2, color: 'white', display: 'block' }}
-                            >
-                                <Link to='/register' style={{ textDecoration: 'none', color: 'inherit' }}>Register</Link>
-                            </Button>
+                            <Link to='/' style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Button
+                                    onClick={handleCloseNavMenu}
+                                    sx={{ my: 2, color: 'white', display: 'block' }}
+                                >
+                                    Login
+                                </Button>
+                            </Link>
+                            <Link to='/register' style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <Button
+                                    onClick={handleCloseNavMenu}
+                                    sx={{ my: 2, color: 'white', display: 'block' }}
+                                >
+                                    Register
+                                </Button>
+                            </Link>
                         </Box>
 
                     </Toolbar>

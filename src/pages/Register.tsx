@@ -3,7 +3,7 @@ import { PublicLayout } from "../layout/PublicLayout"
 import { useState } from "react"
 import { Navigate, useNavigate } from "react-router"
 import { useAuth } from "../hooks/useAuth"
-import { URL_API } from "../config/api"
+import { register } from "../services/apiService"
 
 export const Register = () => {
 
@@ -20,16 +20,8 @@ export const Register = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const response = await fetch(`${URL_API}/user/new`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, email, password }),
-            credentials: 'same-origin'
-        })
-        const data = await response.json()
-        if (data.ok) {
+        const data = await register(username, email, password)
+        if (data) {
             navigate('/')
         }
         setUsername('')

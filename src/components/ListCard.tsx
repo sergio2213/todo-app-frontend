@@ -4,11 +4,11 @@ import { List } from "../pages/TodoLists"
 
 interface ListCardProps {
     list: List
-    handleDelete: (list: List) => void
-    handleOpenEditForm: (list: List) => void
+    onDelete: (list: List) => void
+    onEdit: (list: List) => void
 }
 
-export const ListCard = ({ list, handleDelete, handleOpenEditForm }: ListCardProps) => {
+export const ListCard = ({ list, onDelete, onEdit }: ListCardProps) => {
     return (
         <Card variant='outlined' sx={{ minWidth: '300px' }}>
             <CardContent>
@@ -26,10 +26,10 @@ export const ListCard = ({ list, handleDelete, handleOpenEditForm }: ListCardPro
                 <Button size="small">
                     <Link style={{ color: 'inherit', textDecoration: 'none' }} to={`/lists/${list.id}/todos`}>Open</Link>
                 </Button>
-                <Button size="small" onClick={() => handleDelete(list)}>
+                <Button size="small" onClick={() => onDelete(list)}>
                     Delete
                 </Button>
-                <Button size="small" onClick={() => handleOpenEditForm(list)
+                <Button size="small" onClick={() => onEdit(list)
                 }>
                     Edit
                 </Button>

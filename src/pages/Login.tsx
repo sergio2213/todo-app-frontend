@@ -4,10 +4,10 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { PublicLayout } from "../layout/PublicLayout"
 import { useAuth } from "../hooks/useAuth"
 
-export const Login: React.FC = () => {
+export const Login = () => {
     const [email, setEmail] = useState('sergio@sergio.dev')
     const [password, setPassword] = useState('sergio')
-    
+
     const navigate = useNavigate()
     const auth = useAuth()
 
@@ -37,15 +37,15 @@ export const Login: React.FC = () => {
 
     return (
         <PublicLayout>
-            <Container maxWidth='md' sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px'}}>
-            <Paper elevation={3} component='form' onSubmit={handleSubmit} sx={{height: '350px', minWidth: '350px', display: 'flex', flexDirection: 'column', gap: '10px', padding: '20px', justifyContent: 'center'}}>
-                <Typography variant='body1' display='block' sx={{fontSize: '2rem', fontWeight: 'bold'}}>Log in</Typography>
-                <TextField variant='outlined' type='email' label='Email' value={email} required onChange={handleEmailChange} />
-                <TextField variant='outlined' type='password' label='Password' value={password} required onChange={handlePasswordChange} />
-                <Button type='submit' variant='contained' size='large'>Sign in</Button>
-            </Paper>
-        </Container>
+            <Container maxWidth='md' sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px' }}>
+                <Paper elevation={3} component='form' onSubmit={handleSubmit} sx={{ height: '350px', minWidth: '350px', display: 'flex', flexDirection: 'column', gap: '10px', padding: '20px', justifyContent: 'center' }}>
+                    <Typography variant='body1' display='block' sx={{ fontSize: '2rem', fontWeight: 'bold' }}>Log in</Typography>
+                    <TextField variant='outlined' type='email' label='Email' value={email} required onChange={handleEmailChange} />
+                    <TextField variant='outlined' type='password' label='Password' value={password} required onChange={handlePasswordChange} />
+                    <Button type='submit' variant='contained' size='large'>Sign in</Button>
+                </Paper>
+            </Container>
         </PublicLayout>
-        
+
     )
 }

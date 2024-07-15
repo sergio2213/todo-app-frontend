@@ -5,99 +5,105 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { Link } from "react-router-dom"
 import { useTodos } from "../hooks/useTodos"
 import { EmptyState } from "../components/EmptyState"
+import { useState } from "react";
 
 export interface Todo {
-    id: number
-    todoListId: number
+    id?: number
+    todoListId?: number
     title: string
     description: string
-    isCompleted: boolean
+    isCompleted?: boolean
 }
 
 export const Todos = () => {
+
+    const [showNewTodoForm, setShowNewTodoForm] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [showEditForm, setShowEditForm] = useState(false)
+
     const {
         todoList,
         todos,
-        title,
-        setTitle,
-        description,
-        setDescription,
-        showNewTodoForm,
-        setShowNewTodoForm,
-        showDeleteConfirm,
-        setShowDeleteConfirm,
-        showEditForm,
-        setShowEditForm,
         handleCreateTodo,
         handleDeleteTodo,
-        itemToDelete,
-        setItemToDelete,
-        itemToEdit,
-        setItemToEdit,
+        todoToDelete,
+        setTodoToDelete,
+        todoToEdit,
+        setTodoToEdit,
+        newTodo,
+        setNewTodo,
         handleUpdateIsCompleted,
-        handleUpdateTodo
+        handleEditTodo
 
     } = useTodos()
 
-    const handleCancelNewTodo = () => {
-        setTitle('')
-        setDescription('')
-        setShowNewTodoForm(false)
+    // ---------------------------------------- DELETE TODO
+
+    const handleOpenDeleteConfirm = (todo: Todo) => {
+        setTodoToDelete(todo)
+        setShowDeleteConfirm(true)
     }
 
-    const handleSubmitNewTodo = (e: React.FormEvent) => {
-        e.preventDefault()
-        handleCreateTodo()
-        setTitle('')
-        setDescription('')
-        setShowNewTodoForm(false)
-    }
-
-    const handleDelete = (todo: Todo) => {
-        handleDeleteTodo(todo)
-        console.log(todo.id)
+    const handleCloseDeleteConfirm = () => {
         setShowDeleteConfirm(false)
+        setTodoToDelete({ title: '', description: '' })
     }
 
-    const handleEdit = (e: React.FormEvent) => {
-        e.preventDefault()
-        handleUpdateTodo(itemToEdit as Todo)
-        setItemToEdit(null)
+    const handleDeleteAction = () => {
+        handleDeleteTodo()
+        setShowDeleteConfirm(false)
+        setTodoToDelete({ title: '', description: '' })
+    }
+
+    // ---------------------------------------- EDIT TODO
+
+    const handleOpenEditForm = (todo: Todo) => {
+        setTodoToEdit(todo)
+        setShowEditForm(true)
+    }
+
+    const handleCloseEditForm = () => {
         setShowEditForm(false)
+        setTodoToEdit({ title: '', description: '' })
     }
 
-    const handleOpenNewTodoForm = () => {
-        setShowNewTodoForm(true)
+    const handleTodoToEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value} = e.target
+        setTodoToEdit({...todoToEdit, [name]: value} as Todo)
+    }
+
+    const handleTodoEditAction = (e: React.FormEvent) => {
+        e.preventDefault()
+        handleEditTodo()
+        setShowEditForm(false)
+        setTodoToEdit({ title: '', description: '' })
     }
 
     const handleItemClick = (todo: Todo) => {
         handleUpdateIsCompleted(todo)
     }
 
-    const handleShowDeleteConfirm = (todo: Todo) => {
-        setItemToDelete(todo)
-        setShowDeleteConfirm(true)
+    // ---------------------------------------- CREATE TODO
+
+    const handleOpenNewTodoForm = () => {
+        setShowNewTodoForm(true)
     }
 
-    const handleHideDeleteConfirm = () => {
-        setShowDeleteConfirm(false)
+    const handleCloseNewTodoForm = () => {
+        setShowNewTodoForm(false)
+        setNewTodo({ title: '', description: '' })
     }
 
-    const handleOpenEditForm = (todo: Todo) => {
-        setItemToEdit(todo)
-        // setTitle(todo.title)
-        // setDescription(todo.description)
-        setShowEditForm(true)
+    const handleNewTodoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setNewTodo({ ...newTodo, [name]: value } as Todo)
     }
 
-    const handleCloseEditForm = () => {
-        setShowEditForm(false)
-        setItemToEdit(null)
-    }
-
-    const handleItemToEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value} = e.target
-        setItemToEdit({...itemToEdit, [name]: value} as Todo)
+    const handleCreateTodoAction = (e: React.FormEvent) => {
+        e.preventDefault()
+        handleCreateTodo()
+        setShowNewTodoForm(false)
+        setNewTodo({ title: '', description: '' })
     }
 
     return (
@@ -116,7 +122,7 @@ export const Todos = () => {
                                         <IconButton onClick={() => handleOpenEditForm(todo)} edge="end">
                                             <ModeEditIcon />
                                         </IconButton>
-                                        <IconButton onClick={() => handleShowDeleteConfirm(todo)} edge="end">
+                                        <IconButton onClick={() => handleOpenDeleteConfirm(todo)} edge="end">
                                             <DeleteIcon />
                                         </IconButton>
                                     </>
@@ -144,41 +150,43 @@ export const Todos = () => {
                 { /* BOTONERA */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-around', margin: '10px' }}>
                     <Button onClick={handleOpenNewTodoForm} variant='contained'>Create Todo</Button>
+                    <Link style={{ textDecoration: 'none', color: 'inherit' }} to='/lists'>
                     <Button variant='contained'>
-                        <Link style={{ textDecoration: 'none', color: 'inherit' }} to='/lists'>Back to Lists</Link>
+                        Back to Lists
                     </Button>
+                    </Link>
                 </Box>
 
                 {/* FORMULARIO NUEVA TODO */}
-                <Dialog open={showNewTodoForm} onClose={handleCancelNewTodo}>
+                <Dialog open={showNewTodoForm} onClose={handleCloseNewTodoForm}>
                     <DialogTitle>New Todo</DialogTitle>
                     <DialogContent>
-                        <Box component='form' id='form' onSubmit={handleSubmitNewTodo} sx={{ display: 'flex', gap: 5 }}>
-                            <TextField label='Title' name='title' value={title} onChange={(e) => setTitle(e.target.value)} variant='standard' required />
-                            <TextField label='Description' name='description' value={description} onChange={(e) => setDescription(e.target.value)} variant='standard' />
+                        <Box component='form' id='newTodoForm' onSubmit={handleCreateTodoAction} sx={{ display: 'flex', gap: 5 }}>
+                            <TextField label='Title' name='title' value={newTodo.title} onChange={handleNewTodoChange} variant='standard' required />
+                            <TextField label='Description' name='description' value={newTodo.description} onChange={handleNewTodoChange} variant='standard' />
                         </Box>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCancelNewTodo} variant='contained'>Cancel</Button>
-                        <Button type='submit' form='form' variant='contained'>Create</Button>
+                        <Button onClick={handleCloseNewTodoForm} variant='contained'>Cancel</Button>
+                        <Button type='submit' form='newTodoForm' variant='contained'>Create</Button>
                     </DialogActions>
                 </Dialog>
                 {/* CONFIRMACIÓN ELIMINAR TODO */}
                 <Dialog
                     open={showDeleteConfirm}
-                    onClose={() => setShowDeleteConfirm(false)}
+                    onClose={handleCloseDeleteConfirm}
                 >
                     <DialogTitle>
                         Warning
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Delete '{itemToDelete?.title}'?
+                            Delete '{todoToDelete.title}'?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleHideDeleteConfirm}>Cancel</Button>
-                        <Button onClick={() => handleDelete(itemToDelete as Todo)}>
+                        <Button onClick={handleCloseDeleteConfirm}>Cancel</Button>
+                        <Button onClick={handleDeleteAction}>
                             Delete
                         </Button>
                     </DialogActions>
@@ -187,9 +195,9 @@ export const Todos = () => {
                 <Dialog open={showEditForm} onClose={handleCloseEditForm}>
                     <DialogTitle>Update Todo</DialogTitle>
                     <DialogContent>
-                        <Box component='form' id='editForm' onSubmit={handleEdit} sx={{ display: 'flex', gap: 5 }}>
-                            <TextField label='Title' name='title' value={itemToEdit?.title} onChange={handleItemToEditChange} variant='standard' required />
-                            <TextField label='Description' name='description' value={itemToEdit?.description} onChange={handleItemToEditChange} variant='standard' />
+                        <Box component='form' id='editForm' onSubmit={handleTodoEditAction} sx={{ display: 'flex', gap: 5 }}>
+                            <TextField label='Title' name='title' value={todoToEdit.title} onChange={handleTodoToEditChange} variant='standard' required />
+                            <TextField label='Description' name='description' value={todoToEdit.description} onChange={handleTodoToEditChange} variant='standard' />
                         </Box>
                     </DialogContent>
                     <DialogActions>

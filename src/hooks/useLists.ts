@@ -5,13 +5,9 @@ import { createList, deleteList, getLists, updateList } from "../services/apiSer
 
 export const useLists = () => {
     const [lists, setLists] = useState<List[]>([])
-    const [showNewListForm, setShowNewListForm] = useState(false)
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-    const [showEditForm, setShowEditForm] = useState(false)
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-    const [listToDelete, setListToDelete] = useState<List | null>(null)
-    const [listToEdit, setListToEdit] = useState<List | null> (null)
+    const [newList, setNewList] = useState<List>({ title: '', description: '' })
+    const [listToDelete, setListToDelete] = useState<List>({ title: '', description: '' })
+    const [listToEdit, setListToEdit] = useState<List>({ title: '', description: '' })
 
     const auth = useAuth()
     const user = auth?.user
@@ -27,29 +23,23 @@ export const useLists = () => {
         fetchLists()
     }, [fetchLists])
 
+    const handleDeleteList = async () => {
+        if (auth?.token) {
+            await deleteList(listToDelete.id as number, auth.token)
+            fetchLists()
+        }
+    }
+
+    const handleEditList = async () => {
+        if (auth?.token) {
+            await updateList(listToEdit, auth.token)
+            fetchLists()
+        }
+    }
+
     const handleCreateList = async () => {
         if (auth?.token) {
-            await createList(auth.token, title, description)
-            fetchLists()
-            setTitle('')
-            setDescription('')
-            setShowNewListForm(false)
-        }
-    }
-
-    const handleDeleteList = async (list: List) => {
-        if (auth?.token) {
-            await deleteList(list.id, auth.token)
-            fetchLists()
-            setTitle('')
-            setDescription('')
-            setShowDeleteConfirm(false)
-        }
-    }
-
-    const handleEditList = async (list: List) => {
-        if (auth?.token) {
-            await updateList(list, auth.token)
+            await createList(newList, auth.token)
             fetchLists()
         }
     }
@@ -57,20 +47,12 @@ export const useLists = () => {
     return {
         user,
         lists,
-        showNewListForm,
-        setShowNewListForm,
-        showDeleteConfirm,
-        setShowDeleteConfirm,
-        showEditForm,
-        setShowEditForm,
-        title,
-        setTitle,
-        description,
-        setDescription,
         listToDelete,
         setListToDelete,
         listToEdit,
         setListToEdit,
+        newList,
+        setNewList,
         handleCreateList,
         handleDeleteList,
         handleEditList
